@@ -1,5 +1,5 @@
 
-'''
+```
 export TF_VAR_bucket_name="<s3 bucket name>"
 
 ./terraform init
@@ -7,4 +7,4 @@ export TF_VAR_bucket_name="<s3 bucket name>"
 ./terraform plan
 
 ./terraform apply
-'''
+```
