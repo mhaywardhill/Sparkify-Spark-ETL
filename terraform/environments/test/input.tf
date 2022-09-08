@@ -6,3 +6,7 @@ variable pubsubcidr {
 	default = "172.168.0.0/24"
 }
 
+variable key_name {
+	sensitive   = true
+}
+
