@@ -1,5 +1,3 @@
-variable bucket_name {}
-
 variable vpc-cidr {
 	default = "172.168.0.0/16"
 }
