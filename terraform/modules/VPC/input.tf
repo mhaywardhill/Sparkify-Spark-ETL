@@ -1,3 +1,3 @@
 variable vpc-cidr {}
 
-variable prisubcidr {}
+variable pubsubcidr {}

@@ -11,5 +11,5 @@ module "s3" {
 module "VPC" {
 	source	= "../../modules/VPC"
 	vpc-cidr	= var.vpc-cidr
-	prisubcidr 	= var.prisubcidr
+	pubsubcidr	= var.pubsubcidr
 }
