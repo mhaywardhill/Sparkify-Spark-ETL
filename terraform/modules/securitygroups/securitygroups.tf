@@ -9,6 +9,13 @@ resource "aws_security_group" "master-sg" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+
+ ingress {
+    protocol = "tcp"
+    from_port = 0
+    to_port = 22
+    cidr_blocks = ["${var.my_public_ip}/32"]
+  }
 }
 
 resource "aws_security_group" "worker-sg" {

@@ -10,3 +10,6 @@ variable key_name {
 	sensitive   = true
 }
 
+variable my_public_ip {
+	sensitive   = true
+}
