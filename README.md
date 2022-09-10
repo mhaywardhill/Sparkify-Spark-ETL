@@ -36,7 +36,7 @@ From these tables, we can find insights into what songs their users are listenin
 We require an S3 bucket to hold the output from the ETL. The S3 bucket is created separately from the Terraform configuration so we can tear down the EMR cluster without deleting the parquet files.
 
 ```
-aws s3api create-bucket --bucket "<S3 bucket name>" -acl "private" --region "us-west-2"
+aws s3api create-bucket --bucket "<S3 bucket name>" --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2"
 ```
 
 * ### EC2 Key Pair
