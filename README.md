@@ -1,12 +1,11 @@
 
 ## Project: Data Lakes with Spark 
 
+**Project Description**: 
 
 
 ```
 export TF_VAR_bucket_name="<s3 bucket name>"
-
-**Project Description**: 
 
 ./terraform init
 
@@ -15,4 +14,4 @@ export TF_VAR_bucket_name="<s3 bucket name>"
 ./terraform apply
 ```
 
-![VPC](images/VPC Design.png)
+![VPC](/images/VPC Design.png)
