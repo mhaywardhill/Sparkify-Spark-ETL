@@ -1,6 +1,8 @@
 resource "aws_security_group" "master-sg" {
- name 	= "sparkify-ElasticMapReduce-master"
- vpc_id    	= var.vpc_id
+ name 			= "sparkify-ElasticMapReduce-master"
+
+ revoke_rules_on_delete = true
+ vpc_id    			= var.vpc_id
 
  egress {
     from_port        = 0
@@ -19,9 +21,11 @@ resource "aws_security_group" "master-sg" {
 }
 
 resource "aws_security_group" "worker-sg" {
- name 	= "sparkify-ElasticMapReduce-worker"
- vpc_id    	= var.vpc_id
+ name 			= "sparkify-ElasticMapReduce-worker"
  
+ vpc_id    			= var.vpc_id
+ revoke_rules_on_delete = true
+
  egress {
     from_port        = 0
     to_port          = 0
