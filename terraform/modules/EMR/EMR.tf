@@ -5,6 +5,8 @@ resource "aws_emr_cluster" "cluster" {
 
   	ec2_attributes {
   		subnet_id					= var.subnet_id
+		emr_managed_master_security_group 	= var.master_sg_id
+    		emr_managed_slave_security_group  	= var.worker_sg_id
 		key_name					= var.key_name
 		instance_profile 				= "EMR_EC2_DefaultRole"
   	}
