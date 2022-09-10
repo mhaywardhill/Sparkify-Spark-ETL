@@ -14,4 +14,4 @@ export TF_VAR_bucket_name="<s3 bucket name>"
 ./terraform apply
 ```
 
-![VPC](/images/VPC Design.png)
+![VPC](/images/VPCDesign.png)
