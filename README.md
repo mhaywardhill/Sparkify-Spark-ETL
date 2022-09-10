@@ -69,7 +69,7 @@ We need to set the following environment variables used by Terraform:
 ```
 export TF_VAR_bucket_name="<S3 bucket name>"
 
-export TF_VAR_key_name="<EC2 key pair name>"
+export TF_VAR_key_name="<EC2 key pair name (without the file extension)>"
 
 export TF_VAR_my_public_ip=$(curl -s http://whatismyip.akamai.com/)
 ```
@@ -87,6 +87,41 @@ Run the Terraform init, plan, and apply commands to deploy the resources to buil
 ### Topology of the AWS infrastructure
 
 ![VPC](/images/VPCDesign.png)
+
+
+# How to run the ETL
+
+Receive the IP address of the master node from the Terraform output:
+
+```
+export master_ip_addr=$(./terraform output -raw emr_cluster_dns)
+```
+
+Update the S3 bucket name in the ETL script:
+
+```
+sed -i "s/<bucket name>/$TF_VAR_bucket_name/g" ../../../etl.py
+```
+
+Copy the ETL script to the master node:
+
+```
+scp -i ~/.ssh/$TF_VAR_key_name.pem ../../../etl.py hadoop@$master_ip_addr:/home/hadoop
+```
+
+SSH to the master node:
+
+```
+ssh -i ~/.ssh/$TF_VAR_key_name.pem hadoop@$master_ip_addr
+```
+
+![emrmasternode](/images/EMRMasterNode.png)
+
+Run the ETL script from the master node:
+
+```
+/usr/bin/spark-submit --master yarn etl.py 
+```
 
 ## Clean Up Resources
 
