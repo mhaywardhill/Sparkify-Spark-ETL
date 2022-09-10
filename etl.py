@@ -13,9 +13,22 @@ def create_spark_session():
     return spark
 
 def process_song_data(spark, input_data, output_data):
+    '''
+    Extract, Load and Transform song data from S3, generating
+    dimension tables songs and artists, and storing the dimension
+    tables in S3 as parquet files.
+
+    INPUTS:
+        spark (object)       : Spark session object
+        input_data (string)  : S3 path to the original song data
+        output_data (string) : S3 storage path for the dimension tables
+    
+    OUTPUTS:
+        None
+    '''
    
     # get filepath to song data file
-    song_data = input_data + 'song_data/A/A/A/*.json'
+    song_data = input_data + 'song_data/*/*/*/*.json'
 
     # read song data file
     df = spark.read.json(song_data)
@@ -44,8 +57,14 @@ def process_song_data(spark, input_data, output_data):
     artists_table.write.parquet(os.path.join(output_data, 'artists/artists.parquet'), 'overwrite')
 
 def main():
+    '''
+    Create spark session, run process_song_data() and process_log_data()
+    to generate parquet-formatted fact table songplays and dimension
+    tables users, songs, artists, and time, and to store all tables on S3
+    '''
     spark = create_spark_session()
     
+    # reference: https://stackoverflow.com/questions/42822483/extremely-slow-s3-write-times-from-emr-spark
     spark.sparkContext._jsc.hadoopConfiguration() \
       .set( "mapreduce.fileoutputcommitter.algorithm.version", \
             "2" \
