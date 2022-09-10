@@ -4,9 +4,9 @@ resource "aws_emr_cluster" "cluster" {
   	applications  = ["Spark", "Zeppelin"]
 
   	ec2_attributes {
-  		subnet_id		= var.subnet_id
-		key_name		= var.key_name
-		instance_profile 	= "EMR_EC2_DefaultRole"
+  		subnet_id					= var.subnet_id
+		key_name					= var.key_name
+		instance_profile 				= "EMR_EC2_DefaultRole"
   	}
 
   	master_instance_group {
