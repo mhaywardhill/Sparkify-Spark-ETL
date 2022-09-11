@@ -1,9 +1,9 @@
 from datetime import datetime
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, col
-from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
-from pyspark.sql.types import IntegerType
+from pyspark.sql.functions import udf, hour, dayofmonth, weekofyear, month, year, dayofweek
+from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear
+from pyspark.sql.types import IntegerType,TimestampType
 
 
 def create_spark_session():
@@ -34,17 +34,16 @@ def process_song_data(spark, input_data, output_data):
     # read song data file
     df = spark.read.json(song_data)
 
-    # extract columns to create songs table
+    # extract columns to create the songs table
     songs_table = df.select('song_id', 'title', 'artist_id',
                             'year', 'duration') \
                     .dropDuplicates()
-    songs_table.createOrReplaceTempView('songs')
-
+    
     # write songs table to parquet files partitioned by year and artist
     songs_table.write.partitionBy('year', 'artist_id') \
                      .parquet(os.path.join(output_data, 'songs/songs.parquet'), 'overwrite')
 
-    # extract columns to create artists table
+    # extract columns to create the artists table
     artists_table = df.select('artist_id', 'artist_name', 'artist_location',
                               'artist_latitude', 'artist_longitude') \
                       .withColumnRenamed('artist_name', 'name') \
@@ -53,8 +52,6 @@ def process_song_data(spark, input_data, output_data):
                       .withColumnRenamed('artist_longitude', 'longitude') \
                       .dropDuplicates()
     
-    artists_table.createOrReplaceTempView('artists')
-
     # write artists table to parquet files
     artists_table.write.parquet(os.path.join(output_data, 'artists/artists.parquet'), 'overwrite')
 
@@ -85,16 +82,30 @@ def process_log_data(spark, input_data, output_data):
     # cast userId column
     df = df.withColumn('user_id', df.userId.cast(IntegerType()))
 
-    # extract columns to create users table
+    # extract columns to create the users table
     users_table = df.select('user_id','firstName', 'lastName', 'gender', 'level') \
                     .withColumnRenamed('firstName', 'first_name') \
                     .withColumnRenamed('lastName', 'last_name') \
                     .dropDuplicates()
     
-    users_table.createOrReplaceTempView('users')
-    
     # write artists table to parquet files
     users_table.write.parquet(os.path.join(output_data, 'users/users.parquet'), 'overwrite')
+
+    # add time columns
+    get_timestamp = udf(lambda epoch: datetime.fromtimestamp(epoch/1000),TimestampType())
+    df = df.withColumn("start_time",get_timestamp("ts")) \
+            .withColumn('hour',hour('start_time')) \
+            .withColumn('day',dayofmonth('start_time')) \
+            .withColumn('week',weekofyear('start_time')) \
+            .withColumn('month',month('start_time')) \
+            .withColumn('year',year('start_time')) \
+            .withColumn('weekday',dayofweek('start_time')) 
+    
+    # extract columns to create the time table
+    time_table = df.select('start_time','hour', 'day', 'week', 'month','year','weekday').dropDuplicates()
+
+    # write time table to parquet files
+    time_table.write.parquet(os.path.join(output_data, 'time/time.parquet'), 'overwrite')
 
 def main():
     '''
