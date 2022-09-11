@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, hour, dayofmonth, weekofyear, month, year, dayofweek
+from pyspark.sql.functions import udf, hour, dayofmonth, weekofyear, month, year, dayofweek, monotonically_increasing_id, col
 from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear
 from pyspark.sql.types import IntegerType,TimestampType
 
@@ -55,11 +55,14 @@ def process_song_data(spark, input_data, output_data):
     # write artists table to parquet files
     artists_table.write.parquet(os.path.join(output_data, 'artists/artists.parquet'), 'overwrite')
 
+     # create temp view to be used to join on to create the fact table
+    df.createOrReplaceTempView('song_data')
+
 
 def process_log_data(spark, input_data, output_data):
     '''
     Extract, Load and Transform log data from S3, generating
-    dimension tables users, artists, and songplays dimension
+    dimensions tables users, artists, and songplays, storing the dimension
     tables in S3 as parquet files.
     
     INPUTS:
@@ -88,7 +91,7 @@ def process_log_data(spark, input_data, output_data):
                     .withColumnRenamed('lastName', 'last_name') \
                     .dropDuplicates()
     
-    # write artists table to parquet files
+    # write users table to parquet files
     users_table.write.parquet(os.path.join(output_data, 'users/users.parquet'), 'overwrite')
 
     # add time columns
@@ -106,6 +109,28 @@ def process_log_data(spark, input_data, output_data):
 
     # write time table to parquet files
     time_table.write.parquet(os.path.join(output_data, 'time/time.parquet'), 'overwrite')
+
+    # create data set from songs data
+    song_data_df = spark.sql('SELECT DISTINCT song_id, title, artist_id, artist_name, duration FROM song_data')
+
+    # join data sets
+    joined_tables = df.join(song_data_df, (df.song == song_data_df.title) & (df.artist == song_data_df.artist_name) & (df.length == song_data_df.duration), 'inner') 
+    
+    # extract columns to create the songsplays table
+    songsplays_table = joined_tables.select(
+        monotonically_increasing_id().alias('songplay_id'),
+        col('start_time'),
+        col('user_id'),
+        col('level'),
+        col('song_id'),
+        col('artist_id'),
+        col('sessionId').alias('session_id'),
+        col('location'),
+        col('userAgent').alias('user_agent')) 
+
+    # write songsplays table to parquet files
+    songsplays_table.write.parquet(os.path.join(output_data, 'songsplays/songsplays.parquet'), 'overwrite')
+
 
 def main():
     '''
