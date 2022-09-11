@@ -29,7 +29,7 @@ def process_song_data(spark, input_data, output_data):
     '''
    
     # get filepath to song data file
-    song_data = input_data + 'song_data/A/A/A/*.json'
+    song_data = input_data + 'song_data/*/*/*/*.json'
 
     # read song data file
     df = spark.read.json(song_data)
