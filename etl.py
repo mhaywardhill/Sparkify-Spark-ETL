@@ -3,6 +3,7 @@ import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col
 from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
+from pyspark.sql.types import IntegerType
 
 
 def create_spark_session():
@@ -28,7 +29,7 @@ def process_song_data(spark, input_data, output_data):
     '''
    
     # get filepath to song data file
-    song_data = input_data + 'song_data/*/*/*/*.json'
+    song_data = input_data + 'song_data/A/A/A/*.json'
 
     # read song data file
     df = spark.read.json(song_data)
@@ -51,10 +52,49 @@ def process_song_data(spark, input_data, output_data):
                       .withColumnRenamed('artist_latitude', 'latitude') \
                       .withColumnRenamed('artist_longitude', 'longitude') \
                       .dropDuplicates()
+    
     artists_table.createOrReplaceTempView('artists')
 
     # write artists table to parquet files
     artists_table.write.parquet(os.path.join(output_data, 'artists/artists.parquet'), 'overwrite')
+
+
+def process_log_data(spark, input_data, output_data):
+    '''
+    Extract, Load and Transform log data from S3, generating
+    dimension tables users, artists, and songplays dimension
+    tables in S3 as parquet files.
+    
+    INPUTS:
+        spark (object)       : Spark session object
+        input_data (string)  : S3 path to the original song data
+        output_data (string) : S3 storage path for the dimension tables
+    
+    OUTPUTS:
+       None
+    '''  
+    # get filepath to log data file
+    log_data = input_data + '/log_data/*/*/*.json'
+
+    # read log data file
+    df = spark.read.json(log_data)
+
+     # filter by actions for song plays
+    df = df.filter(df.page == "NextSong")
+
+    # cast userId column
+    df = df.withColumn('user_id', df.userId.cast(IntegerType()))
+
+    # extract columns to create users table
+    users_table = df.select('user_id','firstName', 'lastName', 'gender', 'level') \
+                    .withColumnRenamed('firstName', 'first_name') \
+                    .withColumnRenamed('lastName', 'last_name') \
+                    .dropDuplicates()
+    
+    users_table.createOrReplaceTempView('users')
+    
+    # write artists table to parquet files
+    users_table.write.parquet(os.path.join(output_data, 'users/users.parquet'), 'overwrite')
 
 def main():
     '''
@@ -73,7 +113,8 @@ def main():
     input_data = "s3a://udacity-dend/"
     output_data = "s3a://<bucket name>/"
     
-    process_song_data(spark, input_data, output_data)    
+    process_song_data(spark, input_data, output_data) 
+    process_log_data(spark, input_data, output_data)   
     
 if __name__ == "__main__":
     main()
