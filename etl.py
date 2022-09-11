@@ -108,7 +108,8 @@ def process_log_data(spark, input_data, output_data):
     time_table = df.select('start_time','hour', 'day', 'week', 'month','year','weekday').dropDuplicates()
 
     # write time table to parquet files
-    time_table.write.parquet(os.path.join(output_data, 'time/time.parquet'), 'overwrite')
+    time_table.write.partitionBy('year', 'month') \
+            .parquet(os.path.join(output_data, 'time/time.parquet'), 'overwrite')
 
     # create data set from songs data
     song_data_df = spark.sql('SELECT DISTINCT song_id, title, artist_id, artist_name, duration FROM song_data')
@@ -126,11 +127,13 @@ def process_log_data(spark, input_data, output_data):
         col('artist_id'),
         col('sessionId').alias('session_id'),
         col('location'),
-        col('userAgent').alias('user_agent')) 
+        col('userAgent').alias('user_agent'),
+        col('year'),
+        col('month')) 
 
     # write songsplays table to parquet files
-    songsplays_table.write.parquet(os.path.join(output_data, 'songsplays/songsplays.parquet'), 'overwrite')
-
+    songsplays_table.write.partitionBy('year', 'month') \
+        .parquet(os.path.join(output_data, 'songsplays/songsplays.parquet'), 'overwrite')
 
 def main():
     '''
