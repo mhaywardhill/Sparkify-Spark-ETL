@@ -22,7 +22,7 @@ From these tables, we can find insights into what songs their users are listenin
     │       ├── securitygroups                  <- Terraform config file to add AWS security groups
     │       └── VPC                             <- Terraform config file to add networking components in AWS
     │
-    ├── Read parquet files from AWS S3.ipynb    <- Jupyter notebook to read the parquet files
+    ├── notebooks                               <- Jupyter notebooks for reading the parquet files and troubleshooting the etl 
     │
     └── etl.py                                  <- script to process all JSON data in Spark and write into parquet files on S3
 ```
