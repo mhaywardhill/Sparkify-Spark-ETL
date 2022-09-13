@@ -131,6 +131,8 @@ Create a SSH tunnel to the Spark history server UI port 18080.
 ssh -i ~/.ssh/$TF_VAR_key_name.pem -N -L 8159:localhost:18080 hadoop@$master_ip_addr
 ```
 
+![SparkHistoryUI](/images/SparkHistoryUI.png)
+
 ## Clean Up Resources
 
 Tear down the resources managed by Terraform, managed by the state file in the environment folder.
