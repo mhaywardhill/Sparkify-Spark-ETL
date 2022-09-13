@@ -1,3 +1,7 @@
+# terraform file
+terraform/environments/test/terraform.tfstate
+terraform/environments/test/terraform.tfstate.backup
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
