@@ -11,7 +11,7 @@ From these tables, we can find insights into what songs their users are listenin
 
 ```
     ├── README.md                               <- README file
-    │
+    ├── LICENSE                                 <- the LICENSE
     ├── images                                  <- topology diagram and screenshots
     │
     ├── terraform                               <- Terraform config files to deploy the EMR cluster
